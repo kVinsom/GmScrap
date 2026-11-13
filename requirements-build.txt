@@ -1,0 +1,7 @@
+# Build tools and their transitive dependencies, pinned for repeatable releases.
+build==1.3.0
+colorama==0.4.6; sys_platform == "win32"
+packaging==25.0
+pyproject-hooks==1.2.0
+setuptools==80.9.0
+wheel==0.45.1

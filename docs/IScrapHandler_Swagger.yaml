@@ -1,0 +1,144 @@
+openapi: 3.0.3
+info:
+  title: GmScrap Handler API
+  version: 1.0.0
+  description: >-
+    Proposed HTTP adapter for ScrapHandler.scrape. The Python handler raises
+    validation exceptions; it does not produce HTTP responses itself.
+    ScrapHandler accepts an IScrapService and an optional IErrorResponse through
+    its constructor. When no error response implementation is supplied, it uses
+    ErrorResponse from my_package.handlers.respon.respon. The protocol is defined
+    in my_package.handlers.respon.interface_respon. The responses below describe
+    the proposed adapter mapping with the default ErrorResponse implementation.
+paths:
+  /scrap:
+    post:
+      tags: [Scraping]
+      summary: Run scraping within a geographic radius
+      operationId: scrap
+      description: >-
+        Validate geo, key_word, and radius_in_km in that order, then return the
+        string from IScrapService.scrape. Validation stops at the first error
+        and the service is not called. Validation errors are created through
+        IErrorResponse and raised by the handler. The proposed HTTP adapter
+        maps these TypeError and ValueError exceptions to status 400 with the
+        exception message in detail. Injected implementations may customize
+        these messages.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScrapRequest'
+      responses:
+        '200':
+          description: String returned by the scraping service
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: >-
+            Invalid request data. Examples show each validation error produced
+            by the default ErrorResponse implementation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                geo_type_error:
+                  summary: geo is not a string
+                  description: ErrorResponse.geo_type_error returns TypeError.
+                  value:
+                    detail: 'geo must be a string in the format "latitude, longitude".'
+                geo_format_error:
+                  summary: geo does not contain exactly two comma-separated values
+                  description: ErrorResponse.geo_format_error returns ValueError.
+                  value:
+                    detail: 'geo must use the format "latitude, longitude".'
+                geo_coordinates_error:
+                  summary: A coordinate cannot be parsed as a number
+                  description: >-
+                    ErrorResponse.geo_coordinates_error returns ValueError.
+                    The handler chains the original parsing exception as its cause.
+                  value:
+                    detail: 'geo coordinates must be numbers.'
+                geo_range_error:
+                  summary: A coordinate is nonfinite or outside its allowed range
+                  description: ErrorResponse.geo_range_error returns ValueError.
+                  value:
+                    detail: 'Latitude must be between -90 and 90, and longitude must be between -180 and 180.'
+                key_word_type_error:
+                  summary: key_word is not a string
+                  description: ErrorResponse.key_word_type_error returns TypeError.
+                  value:
+                    detail: 'key_word must be a string of comma-separated search terms.'
+                key_word_empty_error:
+                  summary: A search term is empty after stripping whitespace
+                  description: ErrorResponse.key_word_empty_error returns ValueError.
+                  value:
+                    detail: 'Comma-separated search terms must not be empty.'
+                radius_type_error:
+                  summary: radius_in_km is not an integer or is a boolean
+                  description: ErrorResponse.radius_type_error returns TypeError.
+                  value:
+                    detail: 'radius_in_km must be an integer.'
+                radius_value_error:
+                  summary: radius_in_km is zero or negative
+                  description: ErrorResponse.radius_value_error returns ValueError.
+                  value:
+                    detail: 'The search radius must be greater than 0 km.'
+        '500':
+          description: >-
+            Proposed adapter response for unexpected processing errors.
+            The handler does not catch service exceptions or format this response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ScrapRequest:
+      type: object
+      required: [geo, key_word, radius_in_km]
+      properties:
+        geo:
+          type: string
+          description: >-
+            Latitude, longitude separated by one comma.
+            Both values must be finite numbers.
+            Latitude range [-90, 90]; longitude [-180, 180].
+            Surrounding coordinate whitespace is allowed.
+            Validate numeric ranges in the handler.
+          example: '50.4501, 30.5234'
+        key_word:
+          type: string
+          minLength: 1
+          description: >-
+            Comma-separated search terms. Every term must
+            remain nonempty after stripping whitespace.
+            Validate individual terms in the handler.
+          example: 'cafe, restaurant'
+        radius_in_km:
+          type: integer
+          minimum: 1
+          description: >-
+            Positive integer search radius in kilometers. The Python handler
+            explicitly rejects booleans, even though bool is a subclass of int.
+          example: 5
+      example:
+        geo: '50.4501, 30.5234'
+        key_word: 'cafe, restaurant'
+        radius_in_km: 5
+    ErrorResponse:
+      type: object
+      description: >-
+        Proposed HTTP error body, distinct from the Python ErrorResponse factory
+        in handlers/respon. The factory creates exceptions; the HTTP adapter
+        would serialize their messages into this body.
+      required: [detail]
+      properties:
+        detail:
+          type: string
+          description: Human-readable error message
+          example: 'The search radius must be greater than 0 km.'

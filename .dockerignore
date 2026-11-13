@@ -1,0 +1,25 @@
+# Allow only files required by the two builds into the Docker context.
+*
+!Dockerfile
+!Dockerfile.test
+!requirements.txt
+!requirements-dev.txt
+!requirements-build.txt
+!README.md
+!MANIFEST.in
+!main.py
+!scripts/
+!scripts/**
+!pyproject.toml
+!run_tests.py
+!LICENSE
+!src/
+!src/**
+!tests/
+!tests/**
+**/__pycache__/
+**/*.py[cod]
+**/.env*
+**/.venv/
+**/.ruff_cache/
+**/*.egg-info/

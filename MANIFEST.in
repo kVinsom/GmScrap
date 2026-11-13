@@ -1,0 +1,7 @@
+include main.py run_tests.py requirements*.txt Makefile Dockerfile Dockerfile.test compose.yaml
+include .dockerignore .editorconfig
+recursive-include tests *.py
+recursive-include tests/fixtures *.pem *.md
+recursive-include scripts *.py
+recursive-include docs *.md *.yaml *.json
+global-exclude __pycache__ *.py[cod]

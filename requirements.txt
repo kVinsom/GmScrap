@@ -1,0 +1,8 @@
+# Runtime dependencies, including transitive dependencies. Upgrade as one set.
+certifi==2026.10.23
+charset-normalizer==3.5.2
+geographiclib==2.1
+geopy==2.5.0
+idna==3.20
+requests==2.34.2
+urllib3==2.8.0

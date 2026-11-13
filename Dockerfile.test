@@ -1,0 +1,29 @@
+# Keep this digest aligned with Dockerfile when upgrading Python.
+FROM python:3.14.10-slim-bookworm@sha256:3fe1a0b6c2d6b2ebb572906cdabeca75aeb558c0c17db5ffefbcf8094871c32b AS dependencies
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONUTF8=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+WORKDIR /app
+COPY requirements.txt requirements-build.txt requirements-dev.txt ./
+RUN python -m venv --without-pip /opt/venv \
+    && python -m pip --python /opt/venv install --no-cache-dir --only-binary=:all: -r requirements-dev.txt \
+    && python -m pip --python /opt/venv check
+
+FROM dependencies AS test
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends fonts-dejavu-core \
+    && rm -rf /var/lib/apt/lists/*
+RUN groupadd --gid 10001 app \
+    && useradd --uid 10001 --gid app --no-create-home --shell /usr/sbin/nologin app
+ENV PATH="/opt/venv/bin:$PATH" \
+    PYTHONPATH=/app/src \
+    HOME=/tmp \
+    RUFF_CACHE_DIR=/tmp/ruff
+COPY src/ ./src/
+COPY tests/ ./tests/
+COPY main.py run_tests.py pyproject.toml ./
+COPY scripts/ ./scripts/
+USER 10001:10001
+ENTRYPOINT ["python"]
+CMD ["run_tests.py"]

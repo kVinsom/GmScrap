@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Кав’ярня «Приклад»",
+    "location": "Львів, Україна",
+    "latitude": 49.8419,
+    "longitude": 24.0315,
+    "email": "hello@example.com",
+    "website": "example.com",
+    "facebook": "facebook.com/example.cafe",
+    "instagram": "@example.cafe"
+  },
+  {
+    "name": "Кав’ярня «Приклад»",
+    "location": "Львів, Україна",
+    "latitude": 49.8419,
+    "longitude": 24.0315,
+    "email": "hello@example.com",
+    "website": "example.com",
+    "facebook": "facebook.com/example.cafe",
+    "instagram": "@example.cafe"
+  }
+]

@@ -1,0 +1,15 @@
+.venv
+__pycache__/
+*.py[cod]
+.ruff_cache/
+build/
+dist/
+*.egg-info/
+.idea/
+output/
+tmp/
+.env
+.env.*
+!.env.example
+pdfs.sqlite3
+pdfs.sqlite3-*

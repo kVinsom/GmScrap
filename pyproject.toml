@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools==80.9.0", "wheel==0.45.1", "packaging==25.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gmscrap"
+description = "Find OpenStreetMap places and their published contact details."
+readme = "README.md"
+requires-python = ">=3.14,<3.15"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+dynamic = ["version", "dependencies"]
+classifiers = [
+    "Environment :: Console",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.14",
+    "Operating System :: OS Independent",
+]
+
+[project.scripts]
+gmscrap = "my_package.main:main"
+gmscrap-pdf = "my_package.pdf_main:main"
+
+[project.optional-dependencies]
+pdf = ["reportlab>=4.4,<5"]
+api = ["fastapi>=0.115,<1", "uvicorn>=0.34,<1"]
+
+[project.urls]
+Repository = "https://github.com/kVinsom/GmScrap"
+Issues = "https://github.com/kVinsom/GmScrap/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["my_package*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "my_package._version.__version__"}
+dependencies = {file = ["requirements.txt"]}
+
+[tool.ruff]
+target-version = "py314"
+line-length = 88
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"

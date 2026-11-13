@@ -1,0 +1,50 @@
+name: gmscrap
+
+x-runtime: &runtime
+  init: true
+  user: "10001:10001"
+  read_only: true
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,size=64m,mode=1777
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+  pids_limit: 64
+  mem_limit: 256m
+  cpus: 1.0
+  restart: "no"
+  stop_grace_period: 10s
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  gmscrap:
+    <<: *runtime
+    image: gmscrap:0.1.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    command:
+      - --center
+      - "${SEARCH_CENTER:-49.8415, 24.0315}"
+      - --category
+      - "${SEARCH_CATEGORY:-cafe}"
+      - --radius
+      - "${SEARCH_RADIUS:-5000}"
+      - --name
+      - "${SEARCH_NAME:-}"
+
+  tests:
+    <<: *runtime
+    profiles: [tools]
+    image: gmscrap-tests:0.1.0
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+      target: test
+    network_mode: none
